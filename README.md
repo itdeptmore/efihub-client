@@ -341,16 +341,18 @@ Manage WhatsApp agents and send messages (text or with attachments) to individua
 
 **Messaging**
 
-| Method                                                                                                                   | Returns        | Description                                                  |
-| ------------------------------------------------------------------------------------------------------------------------ | -------------- | ------------------------------------------------------------ |
-| `sendMessage(string $sender, string $to, string $message, ?string $ref_id, ?string $ref_url)`                            | `bool`         | Send a text message to a single recipient.                   |
-| `sendGroupMessage(string $sender, string $to, string $message, ?string $ref_id, ?string $ref_url)`                       | `bool`         | Send a text message to a group.                              |
-| `sendAttachment(string $sender, string $to, string $message, mixed $attachment, ?string $ref_id, ?string $ref_url)`      | `bool`         | Send a message with a file attachment to a single recipient. |
-| `sendGroupAttachment(string $sender, string $to, string $message, mixed $attachment, ?string $ref_id, ?string $ref_url)` | `bool`         | Send a message with a file attachment to a group.            |
-| `getMessages(string $agentCode, string $phone, int $limit = 10)`                                                         | `array`        | Retrieve recent messages for an agent and phone number.      |
-| `downloadMedia(string $agentCode, string $phone, string $messageId)`                                                     | `object\|null` | Download media attachment from a specific message.           |
+| Method                                                                                                                                        | Returns        | Description                                                  |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------ |
+| `sendMessage(string $sender, string $to, string $message, ?string $ref_id, ?string $ref_url, ?bool $delay = true)`                            | `bool`         | Send a text message to a single recipient.                   |
+| `sendGroupMessage(string $sender, string $to, string $message, ?string $ref_id, ?string $ref_url, ?bool $delay = true)`                       | `bool`         | Send a text message to a group.                              |
+| `sendAttachment(string $sender, string $to, string $message, mixed $attachment, ?string $ref_id, ?string $ref_url, ?bool $delay = true)`      | `bool`         | Send a message with a file attachment to a single recipient. |
+| `sendGroupAttachment(string $sender, string $to, string $message, mixed $attachment, ?string $ref_id, ?string $ref_url, ?bool $delay = true)` | `bool`         | Send a message with a file attachment to a group.            |
+| `getMessages(string $agentCode, string $phone, int $limit = 10)`                                                                              | `array`        | Retrieve recent messages for an agent and phone number.      |
+| `downloadMedia(string $agentCode, string $phone, string $messageId)`                                                                          | `object\|null` | Download media attachment from a specific message.           |
 
-All send methods return `true` on HTTP success (2xx), `false` otherwise. The `getMessages()` method returns an array of messages or empty array on failure.
+All message methods return `true` on HTTP success (2xx), `false` otherwise. The `getMessages()` method returns an array of messages or empty array on failure.
+
+The WhatsApp client also normalizes phone numbers for phone-based methods such as `checkPhoneNumber()`, `getMessages()`, and `downloadMedia()`.
 
 #### Agent management
 
@@ -547,7 +549,7 @@ The helpers only return `bool`. For full error details, use the base HTTP client
 
 ```php
 $client = app(\Efihub\EfihubClient::class);
-$response = $client->post('/whatsapp/send_message', [ /* payload */ ]);
+$response = $client->post('/whatsapp/message', [ /* payload */ ]);
 if ($response->failed()) {
     logger()->error('WA send failed', [
         'status' => $response->status(),
@@ -558,7 +560,7 @@ if ($response->failed()) {
 
 #### Phone number normalization
 
-All sending methods (`sendMessage`, `sendGroupMessage`, `sendAttachment`, `sendGroupAttachment`) automatically normalize phone numbers to the international format (`62xxxxxxxxxx` for Indonesia). You may pass numbers in any common format:
+All phone-based methods (`checkPhoneNumber`, `sendMessage`, `sendGroupMessage`, `sendAttachment`, `sendGroupAttachment`, `getMessages`, `downloadMedia`) automatically normalize phone numbers to the international format (`62xxxxxxxxxx` for Indonesia). You may pass numbers in any common format:
 
 - `+628109998877` → `628109998877`
 - `08109998877` → `628109998877`

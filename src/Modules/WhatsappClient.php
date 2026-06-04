@@ -153,9 +153,10 @@ class WhatsappClient
      * @param string $message Text message content
      * @param string|null $ref_id Optional reference ID
      * @param string|null $ref_url Optional reference URL
+     * @param bool|null $delay Optional delay flag (true to delay message sending)
      * @return bool True on success, false on failure
      */
-    public function sendMessage(string $sender, string $to, string $message, ?string $ref_id = null, ?string $ref_url = null): bool
+    public function sendMessage(string $sender, string $to, string $message, ?string $ref_id = null, ?string $ref_url = null, ?bool $delay = true): bool
     {
         $payload = [
             'sender' => $sender,
@@ -163,6 +164,7 @@ class WhatsappClient
             'message' => $message,
             'ref_id' => $ref_id,
             'ref_url' => $ref_url,
+            'delay' => $delay,
         ];
 
         // Send request
@@ -183,9 +185,10 @@ class WhatsappClient
      * @param string $message Text message content
      * @param string|null $ref_id Optional reference ID
      * @param string|null $ref_url Optional reference URL
+     * @param bool|null $delay Optional delay flag (true to delay message sending)
      * @return bool True on success, false on failure
      */
-    public function sendGroupMessage(string $sender, string $to, string $message, ?string $ref_id = null, ?string $ref_url = null): bool
+    public function sendGroupMessage(string $sender, string $to, string $message, ?string $ref_id = null, ?string $ref_url = null, ?bool $delay = true): bool
     {
         $payload = [
             'sender' => $sender,
@@ -193,6 +196,7 @@ class WhatsappClient
             'message' => $message,
             'ref_id' => $ref_id,
             'ref_url' => $ref_url,
+            'delay' => $delay,
         ];
 
         // Send request
@@ -214,9 +218,10 @@ class WhatsappClient
      * @param mixed $attachment File spec accepted by EfihubClient::postMultipart (string path, assoc with 'path'/'contents', or array list)
      * @param string|null $ref_id Optional reference ID
      * @param string|null $ref_url Optional reference URL
+     * @param bool|null $delay Optional delay flag (true to delay message sending)
      * @return bool True on success, false on failure
      */
-    public function sendAttachment(string $sender, string $to, string $message, $attachment, ?string $ref_id = null, ?string $ref_url = null): bool
+    public function sendAttachment(string $sender, string $to, string $message, $attachment, ?string $ref_id = null, ?string $ref_url = null, ?bool $delay = true): bool
     {
         $fields = [
             'sender' => $sender,
@@ -224,6 +229,7 @@ class WhatsappClient
             'message' => $message,
             'ref_id' => $ref_id,
             'ref_url' => $ref_url,
+            'delay' => $delay,
         ];
 
         // Send request
@@ -247,9 +253,10 @@ class WhatsappClient
      * @param mixed $attachment File spec accepted by EfihubClient::postMultipart (string path, assoc with 'path'/'contents', or array list)
      * @param string|null $ref_id Optional reference ID
      * @param string|null $ref_url Optional reference URL
+     * @param bool|null $delay Optional delay flag (true to delay message sending)
      * @return bool True on success, false on failure
      */
-    public function sendGroupAttachment(string $sender, string $to, string $message, $attachment, ?string $ref_id = null, ?string $ref_url = null): bool
+    public function sendGroupAttachment(string $sender, string $to, string $message, $attachment, ?string $ref_id = null, ?string $ref_url = null, ?bool $delay = true): bool
     {
         $fields = [
             'sender' => $sender,
@@ -257,6 +264,7 @@ class WhatsappClient
             'message' => $message,
             'ref_id' => $ref_id,
             'ref_url' => $ref_url,
+            'delay' => $delay,
         ];
 
         // Send request
