@@ -60,6 +60,8 @@ composer require imamnc/efihub-client
 
 #### Laravel
 
+Supports Laravel 7 through 13.
+
 Auto-discovery is enabled. Optionally publish the config file:
 
 ```bash
