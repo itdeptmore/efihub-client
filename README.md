@@ -19,6 +19,7 @@ EFIHUB client for Laravel/PHP that authenticates using OAuth 2.0 Client Credenti
 
 - A lightweight HTTP client (GET/POST/PUT/DELETE) with automatic token caching and retry on 401
 - Storage module to upload files and get public URLs
+- AI module to generate text and image responses with optional file attachments
 - Websocket module to dispatch real-time events to channels
 - WhatsApp module to manage agents (list, QR code, status, phone validation) and send messages (single/group) and file attachments
 - SSO module to generate authorization URL and fetch user profile after callback
@@ -39,6 +40,7 @@ Designed for server-side apps only—do not expose your client secret to browser
   - [Dependency Injection](#dependency-injection)
 - [Modules](#modules)
   - [Storage](#storage-module)
+  - [AI](#ai-module)
   - [WebSocket](#websocket-module)
   - [SSO](#sso-module)
   - [WhatsApp](#whatsapp-module)
@@ -248,6 +250,78 @@ Efihub::storage()->delete('uploads/photo.jpg'); // bool
 - `GET /storage/size`
 - `GET /storage/exists`
 - `DELETE /storage/delete`
+
+---
+
+### AI module
+
+Generate text or images using EFIHUB AI endpoints with optional file attachments.
+
+#### Methods
+
+`Efihub::ai()` returns `Efihub\Modules\AIClient` with:
+
+- `text(string $model, string $prompt, ?string $instructions = null, mixed $attachments = []): ?string` – generate text with optional attachments.
+- `image(string $model, string $prompt, ?string $instructions = null, mixed $attachments = [], ?array $options = []): string|array|null` – generate one or more images, optionally with attachments.
+
+Supported attachment formats:
+
+- single `Illuminate\Http\UploadedFile` or Symfony `UploadedFile`
+- array of uploaded files for the same field
+- existing multipart specs such as string path, `['path' => ...]`, or `['contents' => ...]`
+
+#### Usage
+
+```php
+use Efihub\Facades\Efihub;
+use Illuminate\Http\Request;
+
+// Text generation with optional file attachment(s)
+$text = Efihub::ai()->text(
+    model: 'gpt-4o',
+    prompt: 'Ringkas dokumen berikut dalam 5 poin.',
+    instructions: 'Gunakan bahasa Indonesia yang singkat dan jelas.',
+    attachments: $request->file('document')
+);
+
+// Image generation with optional attachments
+$image = Efihub::ai()->image(
+    model: 'flux',
+    prompt: 'Buat ilustrasi landing page untuk brand furniture modern',
+    instructions: 'Gunakan palet netral premium.',
+    attachments: [
+        $request->file('reference1'),
+        $request->file('reference2'),
+    ],
+    options: [
+        'ratio' => 'landscape',
+        'quality' => 'high',
+    ]
+);
+```
+
+#### Attachment examples
+
+```php
+// Single uploaded file
+Efihub::ai()->text('gpt-4o', 'Review this file', null, $request->file('file'));
+
+// Multiple uploaded files
+Efihub::ai()->image('flux', 'Generate based on these inputs', null, [
+    $request->file('img1'),
+    $request->file('img2'),
+]);
+
+// File path and raw content specs are also accepted by the underlying multipart client
+Efihub::ai()->text('gpt-4o', 'Analyze this PDF', null, [
+    'file' => storage_path('app/docs/report.pdf'),
+]);
+```
+
+#### Endpoints
+
+- `POST /ai/generate/text`
+- `POST /ai/generate/image`
 
 ---
 
