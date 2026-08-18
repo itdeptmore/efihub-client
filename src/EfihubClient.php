@@ -129,7 +129,7 @@ class EfihubClient
     public function postMultipart(string $endpoint, array $fields = [], array $files = [])
     {
         $buildAndSend = function (string $token) use ($endpoint, $fields, $files) {
-            $request = Http::withToken($token);
+            $request = Http::withToken($token)->timeout(240);
 
             foreach ($files as $name => $spec) {
                 // Multiple files for the same field if given as a simple list
