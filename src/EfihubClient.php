@@ -79,7 +79,7 @@ class EfihubClient
         $response = Http::withToken($token)->$method(
             rtrim(config('efihub.api_base_url'), '/') . '/' . ltrim($endpoint, '/'),
             $options
-        )->timeout(240);
+        );
 
         if ($response->status() === 401) {
             Cache::forget('efihub_access_token');
@@ -88,7 +88,7 @@ class EfihubClient
             $response = Http::withToken($token)->$method(
                 rtrim(config('efihub.api_base_url'), '/') . '/' . ltrim($endpoint, '/'),
                 $options
-            )->timeout(240);
+            );
         }
 
         return $response;
