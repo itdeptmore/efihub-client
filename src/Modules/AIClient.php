@@ -20,12 +20,48 @@ class AIClient
     }
 
     /**
+     * Normalize attachments passed to AI methods so they can accept a single UploadedFile,
+     * a list of uploaded files, or the existing associative field map.
+     *
+     * @param mixed $attachments
+     * @return array
+     */
+    private function normalizeAttachments($attachments): array
+    {
+        if ($attachments === null) {
+            return [];
+        }
+
+        if (is_array($attachments)) {
+            $hasNamedKeys = false;
+            foreach (array_keys($attachments) as $key) {
+                if (!is_int($key)) {
+                    $hasNamedKeys = true;
+                    break;
+                }
+            }
+
+            if (!$hasNamedKeys && isset($attachments[0])) {
+                return ['file' => $attachments];
+            }
+
+            return $attachments;
+        }
+
+        if ($attachments instanceof \Illuminate\Http\UploadedFile || $attachments instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+            return ['file' => $attachments];
+        }
+
+        return ['file' => $attachments];
+    }
+
+    /**
      * Generate text using the specified model, prompt, and instructions.
      * 
      * @param string $model The model to use for text generation.
      * @param string $prompt The prompt to provide to the model.
      * @param string|null $instructions Optional instructions to guide the model's response.
-     * @param array|null $attachments Optional attachments to include in the request.
+     * @param mixed $attachments Optional attachments to include in the request.
      * 
      * @return string|null The generated text on success, or null on failure.
      */
@@ -33,13 +69,15 @@ class AIClient
         string $model,
         string $prompt,
         ?string $instructions = null,
-        ?array $attachments = []
+        $attachments = []
     ): ?string {
         if ($instructions) {
             $instructions = <<<PROMPT
             $instructions
             PROMPT;
         }
+
+        $attachments = $this->normalizeAttachments($attachments);
 
         // Call the API endpoint to generate text using the specified model, prompt, and instructions.
         $res = $this->client->postMultipart('/ai/generate/text', [
@@ -61,7 +99,7 @@ class AIClient
      * @param string $model The model to use for image generation.
      * @param string $prompt The prompt to provide to the model.
      * @param string|null $instructions Optional instructions to guide the model's response.
-     * @param array|null $attachments Optional attachments to include in the request.
+     * @param mixed $attachments Optional attachments to include in the request.
      * @param array|null $options Optional parameters such as 'ratio' and 'quality'.
      * 
      * @return string|array|null The URL of the generated image on success, array of URLs, or null on failure.
@@ -70,7 +108,7 @@ class AIClient
         string $model,
         string $prompt,
         ?string $instructions = null,
-        ?array $attachments = [],
+        $attachments = [],
         ?array $options = []
     ): string|array|null {
 
@@ -80,6 +118,8 @@ class AIClient
             $instructions
             PROMPT;
         }
+
+        $attachments = $this->normalizeAttachments($attachments);
 
         // Call the API endpoint to generate an image using the specified model, prompt, and instructions.
         $res = $this->client->postMultipart('/ai/generate/image', [

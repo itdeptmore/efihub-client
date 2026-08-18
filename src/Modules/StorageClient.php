@@ -22,7 +22,7 @@ class StorageClient
     /**
      * Upload a file to storage.
      *
-     * @param mixed $file File spec accepted by EfihubClient::postMultipart (string path, assoc with 'path'/'contents', or array list)
+     * @param mixed $file File spec accepted by EfihubClient::postMultipart (string path, UploadedFile, assoc with 'path'/'contents', or array list)
      * @param string $path Destination path or directory (end with '/' to auto-generate filename)
      * @param array $fields Additional form fields if needed
      * @return string|false URL of uploaded file on success, false on failure
@@ -31,9 +31,15 @@ class StorageClient
     {
         $fields = array_merge(['path' => $path], $fields);
 
-        $res = $this->client->postMultipart('/storage/upload', $fields, [
-            'file' => $file,
-        ]);
+        $payload = ['file' => $file];
+
+        if ($file instanceof \Illuminate\Http\UploadedFile || $file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+            $payload = ['file' => $file];
+        } elseif (is_array($file) && !empty($file) && !isset($file['path']) && !isset($file['contents']) && isset($file[0])) {
+            $payload = ['file' => $file];
+        }
+
+        $res = $this->client->postMultipart('/storage/upload', $fields, $payload);
 
         if (!$res->successful()) {
             return false;
