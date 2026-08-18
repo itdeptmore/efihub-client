@@ -8,17 +8,24 @@ use Efihub\Modules\StorageClient;
 use Efihub\Modules\WebsocketClient;
 use Efihub\Modules\WhatsappClient;
 use Efihub\Modules\SSOClient;
+use Efihub\Modules\AIClient;
 
 class EfihubClient
 {
     /** @var StorageClient|null */
     private ?StorageClient $storage = null;
+
     /** @var WebsocketClient|null */
     private ?WebsocketClient $socket = null;
+
     /** @var WhatsappClient|null */
     private ?WhatsappClient $whatsapp = null;
+
     /** @var SSOClient|null */
     private ?SSOClient $sso = null;
+
+    /** @var AIClient|null */
+    private ?AIClient $ai = null;
 
     public function getAccessToken(): string
     {
@@ -125,7 +132,8 @@ class EfihubClient
             $request = Http::withToken($token);
 
             foreach ($files as $name => $spec) {
-                // Multiple files for the same field if given as a simple list (e.g. ['a.pdf', 'b.pdf'])
+                // Multiple files for the same field if given as a simple list
+                // (e.g. ['a.pdf', 'b.pdf'], [$uploadedFile1, $uploadedFile2])
                 if (is_array($spec) && !isset($spec['path']) && !isset($spec['contents']) && isset($spec[0])) {
                     foreach ($spec as $single) {
                         [$contents, $filename, $headers] = $this->resolveFileSpec($name, $single);
@@ -165,6 +173,20 @@ class EfihubClient
     private function resolveFileSpec(string $field, $spec): array
     {
         $headers = [];
+
+        // Illuminate or Symfony UploadedFile instance
+        if ($spec instanceof \Illuminate\Http\UploadedFile || $spec instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+            $realPath = $spec->getRealPath();
+            $filename = $spec->getClientOriginalName() ?: basename((string) $realPath);
+            $mimeType = $spec->getMimeType() ?: 'application/octet-stream';
+            $headers = ['Content-Type' => $mimeType];
+
+            if ($realPath !== false && is_readable($realPath)) {
+                return [file_get_contents($realPath), $filename, $headers];
+            }
+
+            return [$spec->getContent(), $filename, $headers];
+        }
 
         // String: treat as file path
         if (is_string($spec)) {
@@ -246,5 +268,17 @@ class EfihubClient
         }
 
         return $this->whatsapp;
+    }
+
+    /**
+     * Module accessor for AI Service APIs.
+     */
+    public function ai(): AIClient
+    {
+        if ($this->ai === null) {
+            $this->ai = new AIClient($this);
+        }
+
+        return $this->ai;
     }
 }

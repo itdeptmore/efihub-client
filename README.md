@@ -147,6 +147,16 @@ $uploadRes = Efihub::postMultipart('/documents', ['type' => 'invoice'], [
 if ($uploadRes->failed()) {
     // handle failure
 }
+
+// Also supports Laravel UploadedFile / Symfony UploadedFile
+$uploadRes = Efihub::postMultipart('/documents', ['type' => 'invoice'], [
+    'file' => $request->file('invoice'),
+]);
+
+// Multiple uploaded files for the same field
+$uploadRes = Efihub::postMultipart('/documents', ['type' => 'invoice'], [
+    'file' => [$request->file('invoice1'), $request->file('invoice2')],
+]);
 ```
 
 ### Dependency Injection
