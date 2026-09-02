@@ -62,6 +62,7 @@ class AIClient
      * @param string $prompt The prompt to provide to the model.
      * @param string|null $instructions Optional instructions to guide the model's response.
      * @param mixed $attachments Optional attachments to include in the request.
+     * @param array $attachment_urls Optional URLs of attachments to include in the request.
      * 
      * @return string|null The generated text on success, or null on failure.
      */
@@ -69,7 +70,8 @@ class AIClient
         string $model,
         string $prompt,
         ?string $instructions = null,
-        $attachments = []
+        $attachments = [],
+        array $attachment_urls = []
     ): ?string {
         if ($instructions) {
             $instructions = <<<PROMPT
@@ -84,6 +86,7 @@ class AIClient
             'model' => $model,
             'prompt' => $prompt,
             'instructions' => $instructions,
+            'attachment_urls' => $attachment_urls,
         ], $attachments);
         if (!$res->successful()) {
             return null;
@@ -100,6 +103,7 @@ class AIClient
      * @param string $prompt The prompt to provide to the model.
      * @param string|null $instructions Optional instructions to guide the model's response.
      * @param mixed $attachments Optional attachments to include in the request.
+     * @param array $attachment_urls Optional URLs of attachments to include in the request.
      * @param array|null $options Optional parameters such as 'ratio' and 'quality'.
      * 
      * @return string|array|null The URL of the generated image on success, array of URLs, or null on failure.
@@ -109,6 +113,7 @@ class AIClient
         string $prompt,
         ?string $instructions = null,
         $attachments = [],
+        array $attachment_urls = [],
         ?array $options = []
     ): string|array|null {
 
@@ -126,6 +131,7 @@ class AIClient
             'model' => $model,
             'prompt' => $prompt,
             'instructions' => $instructions,
+            'attachment_urls' => $attachment_urls,
             'ratio' => $options['ratio'] ?? 'landscape',
             'quality' => $options['quality'] ?? 'medium',
         ], $attachments);
