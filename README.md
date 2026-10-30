@@ -55,7 +55,7 @@ Designed for server-side apps only—do not expose your client secret to browser
 Install the package via Composer:
 
 ```bash
-composer require imamnc/efihub-client
+composer require itdeptmore/gbfhub-client
 ```
 
 ### Framework Setup
